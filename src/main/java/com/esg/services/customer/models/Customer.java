@@ -1,11 +1,13 @@
 package com.esg.services.customer.models;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
+import javax.validation.constraints.Size;
 @Entity(name="Customer")
 @Data
 @NoArgsConstructor
@@ -13,20 +15,20 @@ import javax.persistence.Id;
 @Builder
 public class Customer {
     @Id
-    @Column(length = 255)
+    @Size(min =1, max = 255)
     private String customerRef;
-    @Column(length = 1000)
+    @Size(min =0, max = 1000)
     private String customerName;
-    @Column(length = 200)
+    @Size(min =0, max = 200)
     private String addressLine1;
-    @Column(length = 200)
+    @Size(min =0, max = 200)
     private String addressLine2;
-    @Column(length = 200)
+    @Size(min =0, max = 200)
     private String town;
-    @Column(length = 200)
+    @Size(min =0, max = 200)
     private String county;
-    @Column(length = 200)
+    @Size(min =0, max = 200)
     private String country;
-    @Column(length = 6)
+    @Size(min =6, max = 6)
     private String postCode;
 }

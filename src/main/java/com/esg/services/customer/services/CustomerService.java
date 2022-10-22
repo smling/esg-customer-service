@@ -1,9 +1,11 @@
 package com.esg.services.customer.services;
 
 import com.esg.services.customer.exceptions.NotFoundException;
+import com.esg.services.customer.exceptions.RecordAlreadyExistsException;
 import com.esg.services.customer.models.Customer;
 import com.esg.services.customer.repositories.CustomerRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,15 +20,15 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public Mono<Customer> createCustomer(Customer customer) {
-        return Mono.create(callback-> {
-            Customer savedCustomer = customerRepository.save(customer);
-            callback.success(savedCustomer);
-        });
+    public Customer createCustomer(Customer customer) {
+        if(customerRepository.existsById(customer.getCustomerRef())) {
+            throw new RecordAlreadyExistsException();
+        }
+        return customerRepository.save(customer);
     }
 
-    public Mono<Customer> getCustomerByRef(String customerRef) {
+    public Customer getCustomerByRef(String customerRef) {
         Optional<Customer> customerOptional = customerRepository.findById(customerRef);
-        return customerOptional.map(Mono::just).orElseThrow(()->new NotFoundException("No record found for "+customerRef+"."));
+        return customerOptional.orElseThrow(()->new NotFoundException("No record found for "+customerRef+"."));
     }
 }

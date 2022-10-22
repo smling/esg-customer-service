@@ -1,5 +1,7 @@
 package com.esg.services.customer.services;
 
+import com.esg.services.customer.exceptions.NotFoundException;
+import com.esg.services.customer.fixtures.CustomerFixture;
 import com.esg.services.customer.models.Customer;
 import com.esg.services.customer.repositories.CustomerRepository;
 import org.junit.jupiter.api.Assertions;
@@ -27,18 +29,16 @@ class CustomerServiceTest {
     @Test
     @DisplayName("Given valid data, when call method createCustomer(), then success")
     void givenValidData_whenCallMethod_createCustomer_thenSuccess() {
-        Customer customer = mockNormalCustomerData();
+        Customer customer = CustomerFixture.mockNormalCustomerData();
         Mockito.when(customerRepository.save(customer)).thenReturn(customer);
         Assertions.assertDoesNotThrow(()-> {
-            customerService.createCustomer(customer).subscribe(savedCustomer-> {
-                Assertions.assertEquals(customer, savedCustomer);
-            });
+            Customer savedCustomer = customerService.createCustomer(customer);
+            Assertions.assertEquals(customer, savedCustomer);
         });
     }
 
-
     static Stream<Arguments> mockInvalidCustomerTestCasesParameters() {
-        Customer hitMaxLengthCustomerData = mockNormalCustomerData();
+        Customer hitMaxLengthCustomerData = CustomerFixture.mockNormalCustomerData();
         hitMaxLengthCustomerData.setPostCode("INVALID_POST_CODE");
         return Stream.of(
                 Arguments.of("Data hit max length", hitMaxLengthCustomerData, new RuntimeException())
@@ -51,43 +51,46 @@ class CustomerServiceTest {
     void givenInvalidData_whenCallMethod_createCustomer_thenExceptionThrown(String description, Customer customer, Exception exception) {
         Mockito.when(customerRepository.save(customer)).thenThrow(new RuntimeException());
         Assertions.assertThrows(exception.getClass(), ()-> {
-            customerService.createCustomer(customer).subscribe(savedCustomer-> {
-                Assertions.assertEquals(customer, savedCustomer);
-            });
+            Customer savedCustomer =  customerService.createCustomer(customer);
+            Assertions.assertEquals(customer, savedCustomer);
         });
     }
 
     static Stream<Arguments> mockValidGetCustomerRefTestCasesParameters() {
-        Customer customer = mockNormalCustomerData();
+        Customer customer = CustomerFixture.mockNormalCustomerData();
         return Stream.of(
-                Arguments.of("CustomerRef found in database", customer.getCustomerRef(), Optional.of(customer)),
-                Arguments.of("CustomerRef not found in database", customer.getCustomerRef(), Optional.empty())
+                Arguments.of("CustomerRef found in database", customer.getCustomerRef(), Optional.of(customer))
         );
     }
 
     @ParameterizedTest(name="{0}")
     @DisplayName("Given valid data, when call method getCustomerRef(), then success")
     @MethodSource("mockValidGetCustomerRefTestCasesParameters")
-    void givenValidData_whenCallMethod_getCustomerRef_thenSuccess() {
-        Customer customer = mockNormalCustomerData();
-        Mockito.when(customerRepository.findById(customer.getCustomerRef())).thenReturn(Optional.of(customer));
+    void givenValidData_whenCallMethod_getCustomerRef_thenSuccess(String description, String customerRef, Optional<Customer> customer) {
+        Mockito.when(customerRepository.findById(customerRef)).thenReturn(customer);
         Assertions.assertDoesNotThrow(()-> {
-            customerService.getCustomerByRef(customer.getCustomerRef()).subscribe(savedCustomer-> {
-                Assertions.assertEquals(customer, savedCustomer);
-            });
+            Customer searchedCustomer = customerService.getCustomerByRef(customerRef);
+            Assertions.assertTrue(customer.isPresent());
+            Assertions.assertEquals(customer.get(), searchedCustomer);
         });
     }
 
-    static Customer mockNormalCustomerData() {
-        return Customer.builder()
-                .customerRef("Customer_Ref")
-                .customerName("John Doe")
-                .addressLine1("test address line 1.")
-                .addressLine1("test address line 2.")
-                .town("Manchester")
-                .county("North West")
-                .country("United Kingdom")
-                .postCode("M1AAA")
-                .build();
+
+
+    static Stream<Arguments> mockInvalidGetCustomerRefTestCasesParameters() {
+        Customer customer = CustomerFixture.mockNormalCustomerData();
+        return Stream.of(
+                Arguments.of("CustomerRef not found in database", customer.getCustomerRef(), Optional.empty(), new NotFoundException("Mock exception"))
+        );
+    }
+
+    @ParameterizedTest(name="{0}")
+    @DisplayName("Given invalid data, when call method getCustomerRef(), then exception thrown")
+    @MethodSource("mockInvalidGetCustomerRefTestCasesParameters")
+    void givenInvalidData_whenCallMethod_getCustomerRef_thenSuccess(String description, String customerRef, Optional<Customer> customer, Exception exception) {
+        Mockito.when(customerRepository.findById(customerRef)).thenReturn(customer);
+        Assertions.assertThrows(exception.getClass(), ()-> {
+            customerService.getCustomerByRef(customerRef);
+        });
     }
 }
