@@ -5,11 +5,7 @@ import com.esg.services.customer.exceptions.RecordAlreadyExistsException;
 import com.esg.services.customer.models.Customer;
 import com.esg.services.customer.repositories.CustomerRepository;
 import org.springframework.stereotype.Service;
-import reactor.core.Exceptions;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.io.NotActiveException;
 import java.util.Optional;
 
 @Service
