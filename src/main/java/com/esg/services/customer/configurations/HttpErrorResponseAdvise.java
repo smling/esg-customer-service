@@ -1,5 +1,6 @@
 package com.esg.services.customer.configurations;
 
+import com.esg.services.customer.exceptions.InvalidRequestException;
 import com.esg.services.customer.exceptions.NotFoundException;
 import com.esg.services.customer.exceptions.RecordAlreadyExistsException;
 import com.esg.services.customer.models.dto.ErrorResponse;
@@ -24,5 +25,15 @@ public class HttpErrorResponseAdvise {
             RecordAlreadyExistsException ex)
     {
         return ErrorResponse.builder().code(HttpStatus.BAD_REQUEST.value()+"").message("Record already exists").build();
+    }
+
+
+
+    @ExceptionHandler(value = InvalidRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidRequestException(
+            InvalidRequestException ex)
+    {
+        return ErrorResponse.builder().code(HttpStatus.BAD_REQUEST.value()+"").message(ex.getMessage()).build();
     }
 }

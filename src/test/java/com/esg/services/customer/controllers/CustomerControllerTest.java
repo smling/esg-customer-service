@@ -33,7 +33,7 @@ class CustomerControllerTest {
         Customer customer = CustomerFixture.mockNormalCustomerData();
         Mockito.when(customerService.createCustomer(customer)).thenReturn(customer);
         Assertions.assertDoesNotThrow(()-> {
-            ResponseEntity<Customer> response = customerController.create(customer);
+            ResponseEntity<Customer> response = customerController.create("1234", customer);
             Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
         });
     }
@@ -44,7 +44,7 @@ class CustomerControllerTest {
         Customer customer = CustomerFixture.mockNormalCustomerData();
         Mockito.when(customerService.getCustomerByRef(customer.getCustomerRef())).thenReturn(customer);
         Assertions.assertDoesNotThrow(()-> {
-            ResponseEntity<Customer> response = customerController.get(customer.getCustomerRef());
+            ResponseEntity<Customer> response = customerController.get("1234", customer.getCustomerRef());
             Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
             Assertions.assertEquals(customer, response.getBody());
         });
